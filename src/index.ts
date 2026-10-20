@@ -1,12 +1,7 @@
-import express from "express";
+import { createApp } from "./app.js";
 
 const port = Number(process.env.PORT ?? 3000);
-const app = express();
 
-app.get("/health", (_request, response) => {
-  response.json({ status: "ok" });
-});
-
-app.listen(port, () => {
+createApp().listen(port, () => {
   console.log(`AstroBookings API listening on http://localhost:${port}`);
 });
