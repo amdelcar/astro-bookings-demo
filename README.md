@@ -16,6 +16,20 @@ AstroBookings is a backend API for offering bookings for rocket launches.
 > AstroBookings is a fictional training project.
 > It is intentionally in-memory, unauthenticated, and not designed for production use.
 
+## Development
+
+Requires Node.js 20 or later.
+
+```sh
+npm install
+npm run dev
+```
+
+The server listens on port `3000` by default; set `PORT` to use another port.
+The `GET /health` endpoint returns `{"status":"ok"}`.
+Build with `npm run build`, then run the compiled app with `npm start`.
+Run `npm run typecheck` to check types without emitting files.
+
 - [Repository at GitHub](https://github.com/AlbertoBasaloAcademy/astro-bookings-demo)
 - Default branch: `main`
 - **Author**: [Alberto Basalo](https://albertobasalo.dev)
