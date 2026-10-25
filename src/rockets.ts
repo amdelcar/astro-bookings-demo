@@ -1,7 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { Router, type RequestHandler, type Response } from "express";
 
-export type RocketRange = "suborbital" | "orbital" | "moon" | "mars";
+const rocketRanges = ["suborbital", "orbital", "moon", "mars"] as const;
+
+export type RocketRange = (typeof rocketRanges)[number];
 
 export interface Rocket {
   id: string;
@@ -19,14 +21,12 @@ type ValidationResult<T> =
   | { valid: true; value: T }
   | { valid: false; error: string };
 
-const ranges: RocketRange[] = ["suborbital", "orbital", "moon", "mars"];
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function isRocketRange(value: unknown): value is RocketRange {
-  return typeof value === "string" && ranges.some((range) => range === value);
+  return typeof value === "string" && rocketRanges.includes(value as RocketRange);
 }
 
 function validateRocketFields(
@@ -47,10 +47,11 @@ function validateRocketFields(
   }
 
   if (!allowPartial || hasName) {
-    if (typeof input.name !== "string" || input.name.trim().length === 0) {
+    const name = input.name;
+    if (typeof name !== "string" || name.trim().length === 0) {
       return { valid: false, error: "Rocket name is required." };
     }
-    fields.name = input.name.trim();
+    fields.name = name.trim();
   }
 
   if (!allowPartial || hasRange) {
@@ -64,21 +65,39 @@ function validateRocketFields(
   }
 
   if (!allowPartial || hasCapacity) {
+    const capacity = input.capacity;
     if (
-      typeof input.capacity !== "number" ||
-      !Number.isInteger(input.capacity) ||
-      input.capacity < 1 ||
-      input.capacity > 10
+      typeof capacity !== "number" ||
+      !Number.isInteger(capacity) ||
+      capacity < 1 ||
+      capacity > 10
     ) {
       return {
         valid: false,
         error: "Rocket capacity must be an integer from 1 to 10.",
       };
     }
-    fields.capacity = input.capacity;
+    fields.capacity = capacity;
   }
 
   return { valid: true, value: fields };
+}
+
+function readRocketPayload(
+  fields: RocketChanges,
+  allowPartial = false,
+): ValidationResult<RocketFields> {
+  const { name, range, capacity } = fields;
+
+  if (!allowPartial && (name === undefined || range === undefined || capacity === undefined)) {
+    return { valid: false, error: "Name, range, and capacity are required." };
+  }
+
+  if (name === undefined || range === undefined || capacity === undefined) {
+    return { valid: false, error: "Name, range, and capacity are required." };
+  }
+
+  return { valid: true, value: { name, range, capacity } };
 }
 
 function sendError(
@@ -110,13 +129,16 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       return;
     }
 
-    const { name, range, capacity } = result.value;
-    if (name === undefined || range === undefined || capacity === undefined) {
-      sendError(response, 400, "Name, range, and capacity are required.");
+    const payload = readRocketPayload(result.value);
+    if (!payload.valid) {
+      sendError(response, 400, payload.error);
       return;
     }
 
-    const rocket: Rocket = { id: randomUUID(), name, range, capacity };
+    const rocket: Rocket = {
+      id: randomUUID(),
+      ...payload.value,
+    };
     rockets.set(rocket.id, rocket);
     response.status(201).json(rocket);
   };
@@ -130,6 +152,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       sendError(response, 404, "Rocket not found.");
       return;
     }
+
     response.json(rocket);
   };
 
@@ -149,13 +172,13 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       return;
     }
 
-    const { name, range, capacity } = result.value;
-    if (name === undefined || range === undefined || capacity === undefined) {
-      sendError(response, 400, "Name, range, and capacity are required.");
+    const payload = readRocketPayload(result.value);
+    if (!payload.valid) {
+      sendError(response, 400, payload.error);
       return;
     }
 
-    const updatedRocket: Rocket = { id: rocket.id, name, range, capacity };
+    const updatedRocket: Rocket = { id: rocket.id, ...payload.value };
     rockets.set(updatedRocket.id, updatedRocket);
     response.json(updatedRocket);
   };
@@ -176,7 +199,13 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       return;
     }
 
-    const updatedRocket: Rocket = { ...rocket, ...result.value };
+    const payload = readRocketPayload({ ...rocket, ...result.value }, true);
+    if (!payload.valid) {
+      sendError(response, 400, payload.error);
+      return;
+    }
+
+    const updatedRocket: Rocket = { ...rocket, ...payload.value };
     rockets.set(updatedRocket.id, updatedRocket);
     response.json(updatedRocket);
   };
@@ -189,6 +218,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       sendError(response, 404, "Rocket not found.");
       return;
     }
+
     response.status(204).send();
   };
 
