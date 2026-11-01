@@ -85,13 +85,8 @@ function validateRocketFields(
 
 function readRocketPayload(
   fields: RocketChanges,
-  allowPartial = false,
 ): ValidationResult<RocketFields> {
   const { name, range, capacity } = fields;
-
-  if (!allowPartial && (name === undefined || range === undefined || capacity === undefined)) {
-    return { valid: false, error: "Name, range, and capacity are required." };
-  }
 
   if (name === undefined || range === undefined || capacity === undefined) {
     return { valid: false, error: "Name, range, and capacity are required." };
@@ -199,7 +194,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       return;
     }
 
-    const payload = readRocketPayload({ ...rocket, ...result.value }, true);
+    const payload = readRocketPayload({ ...rocket, ...result.value });
     if (!payload.valid) {
       sendError(response, 400, payload.error);
       return;
