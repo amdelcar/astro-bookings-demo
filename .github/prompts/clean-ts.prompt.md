@@ -1,3 +1,12 @@
+---
+name: clean
+description: Cleans the code at a specified file or folder.
+argument-hint: Provide the file or folder path to clean.
+agent: agent
+model: Auto (copilot)
+tools: [execute, read, agent, edit, search, web, todo]  
+---
+
 # Clean TypeScript Code 
 
 ## Role
