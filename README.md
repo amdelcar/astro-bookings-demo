@@ -31,6 +31,18 @@ Build with `npm run build`, then run the compiled app with `npm start`.
 Run `npm test` for the rocket API end-to-end checks, or `npm run typecheck` to
 check types without emitting files.
 
+## Logging
+
+The app emits structured JSON log entries with `console.log` and an ISO-8601
+`timestamp` field so routes, startup events, and failures are easy to trace.
+Startup logs include the server URL, while request logs record the HTTP method,
+request path, HTTP status, elapsed time, and a simple `outcome` classification:
+`success`, `validation_error`, `not_found`, or `server_error`.
+
+Application events such as rocket creation, updates, and deletes are also
+logged, and unexpected server errors are reported separately with the request
+method, path, status, and error type. Request payloads are never logged.
+
 ## Rocket API
 
 Rocket records are stored in memory and are lost when the server restarts.
@@ -59,6 +71,6 @@ Create a rocket with `POST /rockets` and a JSON body such as:
 Invalid rocket data receives a `400` response; requests for unknown rocket IDs
 receive a `404` response.
 
-- [Repository at GitHub](https://github.com/AlbertoBasaloAcademy/astro-bookings-demo)
+- [Repository at GitHub](https://github.com/amdelcar/astro-bookings-demo)
 - Default branch: `main`
-- **Author**: [Alberto Basalo](https://albertobasalo.dev)
+- **Author**: [Ana Delgado]
