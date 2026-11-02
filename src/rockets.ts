@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Router, type RequestHandler, type Response } from "express";
+import { logEvent } from "./logger.js";
 
 const rocketRanges = ["suborbital", "orbital", "moon", "mars"] as const;
 
@@ -135,6 +136,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       ...payload.value,
     };
     rockets.set(rocket.id, rocket);
+    logEvent("rocket_created", { rocketId: rocket.id });
     response.status(201).json(rocket);
   };
 
@@ -175,6 +177,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
 
     const updatedRocket: Rocket = { id: rocket.id, ...payload.value };
     rockets.set(updatedRocket.id, updatedRocket);
+    logEvent("rocket_updated", { rocketId: rocket.id });
     response.json(updatedRocket);
   };
 
@@ -202,6 +205,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
 
     const updatedRocket: Rocket = { ...rocket, ...payload.value };
     rockets.set(updatedRocket.id, updatedRocket);
+    logEvent("rocket_updated", { rocketId: rocket.id });
     response.json(updatedRocket);
   };
 
@@ -214,6 +218,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       return;
     }
 
+    logEvent("rocket_deleted", { rocketId: request.params.id });
     response.status(204).send();
   };
 
