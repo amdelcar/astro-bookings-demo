@@ -1,9 +1,14 @@
 import express, { type ErrorRequestHandler, type Express } from "express";
 import { getErrorType, logEvent } from "./logger.js";
+import { createLaunchesRouter } from "./launches.js";
+import { InMemoryLaunchRepository } from "./launch-repository.js";
+import { InMemoryRocketRepository } from "./rocket-repository.js";
 import { createRocketsRouter } from "./rockets.js";
 
 export function createApp(): Express {
   const app = express();
+  const rocketRepository = new InMemoryRocketRepository();
+  const launchRepository = new InMemoryLaunchRepository();
 
   app.use((request, response, next) => {
     const startedAt = Date.now();
@@ -38,7 +43,8 @@ export function createApp(): Express {
     response.json({ status: "ok" });
   });
 
-  app.use("/rockets", createRocketsRouter());
+  app.use("/rockets", createRocketsRouter(rocketRepository));
+  app.use("/launches", createLaunchesRouter(launchRepository, rocketRepository));
 
   const logErrors: ErrorRequestHandler = (error, request, _response, next) => {
     const status =

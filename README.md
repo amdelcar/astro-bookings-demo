@@ -79,6 +79,33 @@ Create a rocket with `POST /rockets` and a JSON body such as:
 Invalid rocket data receives a `400` response; requests for unknown rocket IDs
 receive a `404` response.
 
+## Launch API
+
+Launches are scheduled for a specific rocket and include a launch date, a price,
+and a minimum passenger threshold. The router validates these values against the
+selected rocket's capacity before accepting the launch.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/launches` | List launches |
+| `POST` | `/launches` | Create a launch |
+| `GET` | `/launches/:id` | Retrieve a launch |
+| `DELETE` | `/launches/:id` | Remove a launch |
+
+Create a launch with `POST /launches` and a JSON body such as:
+
+```json
+{
+  "rocketId": "<rocket-id>",
+  "launchDate": "2027-02-14T18:00:00.000Z",
+  "price": 2500,
+  "minPassengers": 4
+}
+```
+
+Launch creation fails with `400` for invalid data and `404` when the referenced
+rocket does not exist.
+
 - [Repository at GitHub](https://github.com/amdelcar/astro-bookings-demo)
 - Default branch: `main`
 - **Author**: [Ana Delgado]
