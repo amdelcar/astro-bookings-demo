@@ -4,6 +4,8 @@
 - AstroBookings is a fictional backend API for rocket launch bookings.
 - The current API provides health checks and in-memory rocket management.
 - It is a training project, not a production service.
+- GitHub username: `amdelcar`
+- Repository: https://github.com/amdelcar/astro-bookings-demo
 
 ## Technical Implementation
 

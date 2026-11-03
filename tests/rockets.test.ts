@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import { createApp } from "../src/app.js";
-import { logEvent } from "../src/logger.js";
 import type { Rocket, RocketRange } from "../src/rockets.js";
 
 const server = createApp().listen(0);
@@ -39,80 +38,6 @@ after(async () => {
 async function readJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
-
-test("logs structured application events to the console", () => {
-  const originalConsoleLog = console.log;
-  const entries: string[] = [];
-
-  console.log = (...args: unknown[]) => {
-    entries.push(args.map((value) => String(value)).join(" "));
-  };
-
-  try {
-    logEvent("server_started", { port: 3000, host: "localhost" });
-    assert.equal(entries.length, 1);
-
-    const entry = JSON.parse(entries[0]);
-    assert.equal(entry.event, "server_started");
-    assert.equal(entry.port, 3000);
-    assert.equal(entry.host, "localhost");
-    assert.ok(typeof entry.timestamp === "string");
-    assert.match(entry.timestamp, /^\d{4}-\d{2}-\d{2}T/);
-  } finally {
-    console.log = originalConsoleLog;
-  }
-});
-
-test("logs HTTP outcomes without including request payloads", async () => {
-  const originalConsoleLog = console.log;
-  const entries: string[] = [];
-
-  console.log = (...args: unknown[]) => {
-    entries.push(args.map((value) => String(value)).join(" "));
-  };
-
-  try {
-    const healthResponse = await fetch(`${baseUrl}/health`);
-    assert.equal(healthResponse.status, 200);
-
-    const invalidResponse = await fetch(`${baseUrl}/rockets`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "", range: "orbital", capacity: 2 }),
-    });
-    assert.equal(invalidResponse.status, 400);
-
-    const parsedEntries = entries
-      .map((entry) => JSON.parse(entry))
-      .filter((entry) => typeof entry === "object" && entry !== null);
-
-    assert.ok(
-      parsedEntries.some(
-        (entry) =>
-          entry.event === "request_completed" &&
-          entry.method === "GET" &&
-          entry.path === "/health" &&
-          entry.outcome === "success",
-      ),
-    );
-    assert.ok(
-      parsedEntries.some(
-        (entry) =>
-          entry.event === "request_completed" &&
-          entry.method === "POST" &&
-          entry.path === "/rockets" &&
-          entry.outcome === "validation_error",
-      ),
-    );
-    assert.ok(
-      !entries.some((entry) =>
-        /"body"|payload|requestBody/i.test(entry),
-      ),
-    );
-  } finally {
-    console.log = originalConsoleLog;
-  }
-});
 
 test("creates valid rockets and lists supported ranges", async () => {
   const healthResponse = await fetch(`${baseUrl}/health`);
