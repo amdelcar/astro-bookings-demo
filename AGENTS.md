@@ -41,7 +41,7 @@ npm run typecheck
 ├── package.json          # Scripts and dependencies
 ├── tsconfig.json         # TypeScript configuration
 ├── specs/                # Feature specifications
-├── src/                  # Express app and API routes
+├── src/                  # Express app, API routes, and rocket repository
 └── tests/                # End-to-end API tests
 ```
 

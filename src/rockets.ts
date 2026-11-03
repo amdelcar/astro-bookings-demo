@@ -1,19 +1,17 @@
-import { randomUUID } from "node:crypto";
 import { Router, type RequestHandler, type Response } from "express";
 import { logEvent } from "./logger.js";
+import {
+  rocketRanges,
+  type Rocket,
+  type RocketFields,
+  type RocketRange,
+} from "./rocket.js";
+import {
+  InMemoryRocketRepository,
+  type RocketRepository,
+} from "./rocket-repository.js";
 
-const rocketRanges = ["suborbital", "orbital", "moon", "mars"] as const;
-
-export type RocketRange = (typeof rocketRanges)[number];
-
-export interface Rocket {
-  id: string;
-  name: string;
-  range: RocketRange;
-  capacity: number;
-}
-
-type RocketFields = Omit<Rocket, "id">;
+export type { Rocket, RocketRange } from "./rocket.js";
 type RocketChanges = Partial<RocketFields>;
 type ErrorResponse = { error: string };
 type ApiResponse = Rocket | Rocket[] | ErrorResponse;
@@ -104,15 +102,16 @@ function sendError(
   response.status(status).json({ error: message });
 }
 
-export function createRocketsRouter(): ReturnType<typeof Router> {
-  const rockets = new Map<string, Rocket>();
+export function createRocketsRouter(
+  repository: RocketRepository = new InMemoryRocketRepository(),
+): ReturnType<typeof Router> {
   const router = Router();
 
   const listRockets: RequestHandler<RouteParams, ApiResponse, unknown> = (
     _request,
     response,
   ) => {
-    response.json([...rockets.values()]);
+    response.json(repository.list());
   };
 
   const createRocket: RequestHandler<RouteParams, ApiResponse, unknown> = (
@@ -131,11 +130,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       return;
     }
 
-    const rocket: Rocket = {
-      id: randomUUID(),
-      ...payload.value,
-    };
-    rockets.set(rocket.id, rocket);
+    const rocket = repository.create(payload.value);
     logEvent("rocket_created", { rocketId: rocket.id });
     response.status(201).json(rocket);
   };
@@ -144,7 +139,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
     request,
     response,
   ) => {
-    const rocket = rockets.get(request.params.id);
+    const rocket = repository.findById(request.params.id);
     if (!rocket) {
       sendError(response, 404, "Rocket not found.");
       return;
@@ -157,7 +152,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
     request,
     response,
   ) => {
-    const rocket = rockets.get(request.params.id);
+    const rocket = repository.findById(request.params.id);
     if (!rocket) {
       sendError(response, 404, "Rocket not found.");
       return;
@@ -175,8 +170,12 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       return;
     }
 
-    const updatedRocket: Rocket = { id: rocket.id, ...payload.value };
-    rockets.set(updatedRocket.id, updatedRocket);
+    const updatedRocket = repository.update(rocket.id, payload.value);
+    if (!updatedRocket) {
+      sendError(response, 404, "Rocket not found.");
+      return;
+    }
+
     logEvent("rocket_updated", { rocketId: rocket.id });
     response.json(updatedRocket);
   };
@@ -185,7 +184,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
     request,
     response,
   ) => {
-    const rocket = rockets.get(request.params.id);
+    const rocket = repository.findById(request.params.id);
     if (!rocket) {
       sendError(response, 404, "Rocket not found.");
       return;
@@ -203,8 +202,12 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
       return;
     }
 
-    const updatedRocket: Rocket = { ...rocket, ...payload.value };
-    rockets.set(updatedRocket.id, updatedRocket);
+    const updatedRocket = repository.update(rocket.id, payload.value);
+    if (!updatedRocket) {
+      sendError(response, 404, "Rocket not found.");
+      return;
+    }
+
     logEvent("rocket_updated", { rocketId: rocket.id });
     response.json(updatedRocket);
   };
@@ -213,7 +216,7 @@ export function createRocketsRouter(): ReturnType<typeof Router> {
     request,
     response,
   ) => {
-    if (!rockets.delete(request.params.id)) {
+    if (!repository.delete(request.params.id)) {
       sendError(response, 404, "Rocket not found.");
       return;
     }

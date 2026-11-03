@@ -50,7 +50,10 @@ failures.
 
 ## Rocket API
 
-Rocket records are stored in memory and are lost when the server restarts.
+Rocket records are managed through a repository abstraction. The default
+in-memory repository loses records when the server restarts.
+The API router accepts a `RocketRepository` implementation to allow different
+storage backends without changing request handling or validation.
 Each rocket has a generated `id`, a non-empty `name`, a `range` (`suborbital`,
 `orbital`, `moon`, or `mars`), and a `capacity` from 1 to 10 passengers.
 
