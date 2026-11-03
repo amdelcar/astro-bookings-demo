@@ -20,10 +20,13 @@
 
 ### Core files
 - `src/index.ts` boots the server and starts listening on the configured port.
-- `src/app.ts` creates the Express app, attaches middleware, registers `/health`, and wires the rockets router.
+- `src/app.ts` creates the Express app, attaches middleware, registers `/health`, and wires the rockets and launches routers.
 - `src/rockets.ts` implements the `/rockets` CRUD routes and validation logic.
 - `src/rocket.ts` defines the rocket model and supported ranges.
 - `src/rocket-repository.ts` defines the repository interface and the default in-memory implementation.
+- `src/launches.ts` implements the `/launches` scheduling routes and validates launch constraints against rocket capacity.
+- `src/launch.ts` defines the launch model and required fields.
+- `src/launch-repository.ts` defines the launch repository abstraction and default in-memory storage.
 - `src/logger.ts` provides structured logging helpers for application and request events.
 
 ### Logging behavior
