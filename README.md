@@ -33,15 +33,20 @@ check types without emitting files.
 
 ## Logging
 
-The app emits structured JSON log entries with `console.log` and an ISO-8601
-`timestamp` field so routes, startup events, and failures are easy to trace.
-Startup logs include the server URL, while request logs record the HTTP method,
-request path, HTTP status, elapsed time, and a simple `outcome` classification:
-`success`, `validation_error`, `not_found`, or `server_error`.
+The service writes JSON log lines to stdout for key server events. Every log entry
+includes a UTC `timestamp`, the `event` name, and any relevant metadata such as a
+request method, route, response status, elapsed time, or resource ID. Request
+bodies are never logged, so sensitive payload data stays out of the terminal.
 
-Application events such as rocket creation, updates, and deletes are also
-logged, and unexpected server errors are reported separately with the request
-method, path, status, and error type. Request payloads are never logged.
+Example log output:
+
+```json
+{"timestamp":"2026-11-02T01:04:15.000Z","event":"request_completed","method":"GET","path":"/health","status":200,"elapsedMs":5,"outcome":"success"}
+```
+
+This helps track application startup, request outcomes, and unexpected server
+errors while keeping validation and not-found cases easy to differentiate from
+failures.
 
 ## Rocket API
 

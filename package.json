@@ -10,7 +10,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "test": "tsx --test tests/rockets.test.ts",
+    "test": "tsx --test tests/rockets.test.ts tests/logging.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
