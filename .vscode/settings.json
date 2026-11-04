@@ -1,0 +1,13 @@
+{
+  "window.zoomLevel": 1,
+
+  "chat.promptFilesLocations": {
+    ".agents/prompts": true
+  },
+  "chat.agentFilesLocations": {
+    ".agents": true
+  },
+  "chat.agentSkillsLocations": {
+    ".agents/skills": true,
+  }
+}
