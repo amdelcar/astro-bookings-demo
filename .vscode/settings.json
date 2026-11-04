@@ -1,6 +1,5 @@
 {
-  "window.zoomLevel": 1,
-
+  
   "chat.promptFilesLocations": {
     ".agents/prompts": true
   },
