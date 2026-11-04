@@ -15,13 +15,14 @@ A backend API for managing rockets, launches, and future bookings for space trav
 - Runtime: Node.js 22
 - Framework: Express 4.21
 - Data store: In-memory collections
-- Testing: Playwright 1.58
+- Testing: Playwright 1.58 for E2E and Vitest for unit tests
 - Logging: Console logger with levels
 
 ### Development Tools
 - Build: `tsc`
 - Dev server: `tsx watch`
-- Tests: `playwright test`
+- Unit tests: `vitest`
+- E2E tests: `playwright test`
 - Package manager: npm
 - Linting: None configured
 - Deployment: None configured
@@ -39,6 +40,7 @@ flowchart LR
   API --> Service[Service Layer]
   Service --> Repo[Repository Layer]
   Repo --> Store[In-memory Store]
+  Service --> UnitTests[Vitest Unit Tests]
   API --> Logger[Logger]
   API --> Error[Error Handler]
 ```
@@ -82,3 +84,9 @@ Errors are normalized by the error handler and returned as JSON.
 - **Status**: Accepted
 - **Context**: The project needs scenario-driven validation of endpoints.
 - **Consequences**: Reliable e2e coverage with clear assertions.
+
+### ADR 5: Vitest for unit testing
+- **Decision**: Use Vitest for service and utility layer unit tests.
+- **Status**: Accepted
+- **Context**: The codebase uses TypeScript and ES modules, and fast unit feedback is needed without a heavy E2E harness.
+- **Consequences**: Colocated `*.spec.ts` files improve discoverability, and mocked repositories keep business-logic tests isolated and fast.

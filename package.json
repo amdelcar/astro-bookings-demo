@@ -11,13 +11,18 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "test": "tsx --test tests/rockets.test.ts tests/rocket-repository.test.ts tests/logging.test.ts",
+    "test:dev": "vitest",
+    "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^20.17.0",
+    "@vitest/coverage-v8": "^4.1.12",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.12"
   },
   "dependencies": {
     "express": "^5.3.0"
