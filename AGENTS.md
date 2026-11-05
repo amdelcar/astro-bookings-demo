@@ -1,9 +1,9 @@
 # Agents Instructions
 
 ## Product Overview
-AstroBookings is a backend API for managing rockets, launches, and customer
-profiles for a rocket-launch booking demo. Rockets have capacity limits and
-launch status lifecycles. Booking and payment features are planned.
+AstroBookings is a backend API for managing rockets, launches, customer
+profiles, and seat bookings for a rocket-launch demo. Rockets have capacity
+limits and launch status lifecycles. Payment processing is planned.
 This is a demo system for training purposes.
 
 ## Technical Implementation
@@ -15,7 +15,7 @@ This is a demo system for training purposes.
 - Security: **None** (demo only)
 - Testing: **Node.js test runner** for HTTP/repository tests and **Vitest** for unit tests
 - Logging: **Structured JSON console events**
-- Version: **1.9.0** (tracked in package.json and CHANGELOG.md)
+- Version: **1.10.0** (tracked in package.json and CHANGELOG.md)
 
 ### Development workflow
 ```bash
@@ -55,10 +55,13 @@ npm run test:coverage # Run coverage report
 ├── src/                  # Source code
 │   ├── app.ts            # Express app composition
 │   ├── index.ts          # Server entry point
+│   ├── booking.ts        # Booking types
+│   ├── booking-repository.ts
+│   ├── bookings.ts       # Booking API routes
 │   ├── customer.ts       # Customer data types
 │   ├── customer-repository.ts
 │   ├── customers.ts      # Customer API routes
-│   ├── launch.ts         # Launch data types
+│   ├── launch.ts         # Launch data types and lifecycle status
 │   ├── launch-repository.ts
 │   ├── launches.ts       # Launch API routes
 │   ├── rocket.ts         # Rocket data types
@@ -67,13 +70,17 @@ npm run test:coverage # Run coverage report
 │   ├── routes/           # Express route handlers
 │   │   └── customerRoutes.ts # Compatibility export for customer router
 │   ├── services/         # Business logic and data stores
+│   │   ├── booking.service.ts
+│   │   ├── booking.service.spec.ts
 │   │   └── customer.service.ts
+│   ├── booking-repository.spec.ts
 │   ├── types/            # Compatibility exports for domain types
 │   ├── logger.ts         # Structured event logging
 │   └── utils/
 │       └── validation.ts # Shared input validation
 └── tests/                # HTTP and repository test files
     ├── customer.spec.ts  # Legacy, unconfigured customer test prototype
+    ├── bookings.test.ts
     ├── logging.test.ts
     ├── rocket-repository.test.ts
     └── rockets.test.ts

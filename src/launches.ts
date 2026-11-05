@@ -6,18 +6,21 @@ import {
   InMemoryRocketRepository,
   type RocketRepository,
 } from "./rocket-repository.js";
+import type { LaunchAvailability } from "./booking.js";
+import type { BookingService } from "./services/booking.service.js";
+import { isRecord } from "./utils/validation.js";
 
 export type { Launch } from "./launch.js";
 type ErrorResponse = { error: string };
-type ApiResponse = Launch | Launch[] | ErrorResponse;
+type ApiResponse =
+  | Launch
+  | Launch[]
+  | LaunchAvailability
+  | ErrorResponse;
 type RouteParams = Record<string, string>;
 type ValidationResult<T> =
   | { valid: true; value: T }
   | { valid: false; error: string };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function readStringField(
   record: Record<string, unknown>,
@@ -123,6 +126,7 @@ function sendError(
 export function createLaunchesRouter(
   repository: LaunchRepository = new InMemoryLaunchRepository(),
   rocketRepository: RocketRepository = new InMemoryRocketRepository(),
+  bookingService?: BookingService,
 ): ReturnType<typeof Router> {
   const router = Router();
 
@@ -193,8 +197,26 @@ export function createLaunchesRouter(
     response.status(204).send();
   };
 
+  const getAvailability: RequestHandler<
+    RouteParams,
+    ApiResponse,
+    unknown
+  > = (request, response) => {
+    const result = bookingService?.getAvailability(request.params.id);
+    if (!result || result.kind === "not_found") {
+      const resource = result?.resource ?? "Launch";
+      sendError(response, 404, `${resource} not found.`);
+      return;
+    }
+
+    response.json(result.availability);
+  };
+
   router.get("/", listLaunches);
   router.post("/", createLaunch);
+  if (bookingService) {
+    router.get("/:id/availability", getAvailability);
+  }
   router.get("/:id", getLaunch);
   router.delete("/:id", deleteLaunch);
 

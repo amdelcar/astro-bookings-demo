@@ -1,6 +1,6 @@
 # Seat Booking and Reservation Specification
 - **Type**: feat
-- **Status**: Planned
+- **Status**: Verified
 
 ## Problem Description
 
@@ -40,8 +40,9 @@ record, and a clear total cost for each booking.
   more seats.
 - A launch accepts bookings only while it is open for booking; completed,
   suspended, or cancelled launches are not bookable.
-- The requested seat count must not exceed the launch's current available
-  seats.
+- The requested seat count must be a positive integer no greater than total
+  launch capacity. Requests over total capacity are invalid; requests over
+  current availability conflict.
 - Total price is the launch's per-seat price multiplied by the requested seat
   count, in the same units as the launch price.
 - A booking and its seat reservation are committed together. A failed
@@ -57,29 +58,29 @@ record, and a clear total cost for each booking.
 
 ## Acceptance Criteria
 
-- [ ] WHEN a client requests availability for an existing launch, THE System
+- [x] WHEN a client requests availability for an existing launch, THE System
   SHALL return its total capacity, reserved seat count, available seat count,
   and per-seat price.
-- [ ] WHEN a client submits a valid booking for an existing customer and a
+- [x] WHEN a client submits a valid booking for an existing customer and a
   launch open for booking with sufficient seats, THE System SHALL create one
   booking and return `201` with its identifiers, seat count, per-seat price,
   total price, and creation timestamp.
-- [ ] WHEN a client submits a booking with a missing or unknown customer or
+- [x] WHEN a client submits a booking with a missing or unknown customer or
   launch, THE System SHALL return `404` and SHALL NOT create a booking or
   reserve seats.
-- [ ] WHEN a client submits a booking with a seat count that is missing, not a
-  positive integer, or larger than the launch capacity, THE System SHALL return
-  `400` and SHALL NOT create a booking or reserve seats.
-- [ ] WHEN a client requests more seats than are currently available, THE
+- [x] WHEN a client submits a booking with a seat count that is missing, not a
+  positive integer, or larger than total launch capacity, THE System SHALL
+  return `400` and SHALL NOT create a booking or reserve seats.
+- [x] WHEN a client requests more seats than are currently available, THE
   System SHALL return `409` with the available seat count and SHALL NOT create
   a booking or change availability.
-- [ ] WHILE a launch is completed, suspended, or cancelled, WHEN a client
+- [x] WHILE a launch is completed, suspended, or cancelled, WHEN a client
   submits a booking for that launch, THE System SHALL reject the booking and
   SHALL NOT reserve seats.
-- [ ] WHEN multiple bookings compete for the remaining seats, THE System SHALL
-  confirm only bookings whose combined seat counts do not exceed capacity and
+- [x] WHEN multiple bookings compete for the remaining seats, THE System SHALL
+  reserve only bookings whose combined seat counts do not exceed capacity and
   SHALL leave availability consistent with the confirmed bookings.
-- [ ] WHEN a client requests an existing booking or a customer's booking
+- [x] WHEN a client requests an existing booking or a customer's booking
   history, THE System SHALL return the requested booking record or the
   customer's bookings; WHEN the requested customer or booking does not exist,
   THE System SHALL return `404`.
@@ -88,3 +89,12 @@ record, and a clear total cost for each booking.
 **Dependencies**: FR2 - Launch Scheduling and Management; FR3 - Customer
 Registration and Profile Management  
 **Priority**: High
+
+## Verification Notes
+
+- Booking requests with invalid or over-capacity seat counts return `400`;
+  requests exceeding remaining seats return `409`.
+- Successful bookings have `pending` status and immediately reserve their
+  seats. Payment confirmation is deferred to FR5.
+- API and unit tests cover booking creation, availability, history, not-found
+  and validation responses, terminal launch statuses, and competing requests.
