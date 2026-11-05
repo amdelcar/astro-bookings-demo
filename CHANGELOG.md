@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-11-05
+
+### Added
+
+- Seat booking API for reserving seats on launches, retrieving bookings, and
+  listing customer booking history.
+- Launch availability endpoint with capacity, reserved seats, remaining seats,
+  and per-seat pricing.
+- Atomic in-memory reservations with capacity validation and launch-status
+  eligibility checks.
+- Unit and HTTP API tests for booking creation, availability, conflicts, and
+  invalid requests.
+
 ## [1.9.0] - 2026-11-05
 
 ### Added
