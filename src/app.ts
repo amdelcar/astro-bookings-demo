@@ -1,11 +1,11 @@
 import express, { type ErrorRequestHandler, type Express } from "express";
 import { getErrorType, logEvent } from "./logger.js";
+import { InMemoryCustomerRepository } from "./customer-repository.js";
 import { createCustomersRouter } from "./customers.js";
 import { createLaunchesRouter } from "./launches.js";
 import { InMemoryLaunchRepository } from "./launch-repository.js";
 import { InMemoryRocketRepository } from "./rocket-repository.js";
 import { createRocketsRouter } from "./rockets.js";
-import { InMemoryCustomerRepository } from "./customer-repository.js";
 
 export function createApp(): Express {
   const app = express();

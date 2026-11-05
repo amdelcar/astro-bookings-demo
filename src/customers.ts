@@ -1,6 +1,9 @@
 import { Router, type RequestHandler, type Response } from "express";
 import { logEvent } from "./logger.js";
-import { InMemoryCustomerRepository, type CustomerRepository } from "./customer-repository.js";
+import {
+  InMemoryCustomerRepository,
+  type CustomerRepository,
+} from "./customer-repository.js";
 import type { Customer } from "./customer.js";
 import { CustomerService } from "./services/customer.service.js";
 import { ValidationError } from "./utils/validation.js";
@@ -68,7 +71,12 @@ export function createCustomersRouter(
     const total = matches.length;
     const requestedPage = page ?? 1;
     const requestedLimit = limit ?? Math.max(total, 1);
-    const items = service.list({ email, name, page: requestedPage, limit: requestedLimit });
+    const items = service.list({
+      email,
+      name,
+      page: requestedPage,
+      limit: requestedLimit,
+    });
 
     response.json({
       items,

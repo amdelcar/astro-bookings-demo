@@ -1,7 +1,6 @@
-import type { Customer, CustomerFields, CustomerQuery } from "../customer.js";
+import type { Customer, CustomerQuery } from "../customer.js";
 import type { CustomerRepository } from "../customer-repository.js";
 import {
-  normalizeEmail,
   validateCustomerInput,
   validateCustomerUpdate,
   ValidationError,
@@ -11,14 +10,13 @@ export class CustomerService {
   constructor(private readonly repository: CustomerRepository) {}
 
   create(input: unknown): Customer {
-    const payload = validateCustomerInput(input) as CustomerFields;
-    const email = normalizeEmail(payload.email);
+    const payload = validateCustomerInput(input);
 
-    if (this.repository.findByEmail(email)) {
+    if (this.repository.findByEmail(payload.email)) {
       throw new ValidationError("Email already registered.");
     }
 
-    return this.repository.create({ ...payload, email });
+    return this.repository.create(payload);
   }
 
   list(query: CustomerQuery = {}): Customer[] {
@@ -30,7 +28,7 @@ export class CustomerService {
   }
 
   getByEmail(email: string): Customer | undefined {
-    return this.repository.findByEmail(normalizeEmail(email));
+    return this.repository.findByEmail(email);
   }
 
   update(id: string, input: unknown): Customer | undefined {

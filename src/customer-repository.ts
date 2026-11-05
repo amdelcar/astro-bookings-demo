@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { Customer, CustomerFields, CustomerQuery } from "./customer.js";
+import { normalizeEmail } from "./utils/validation.js";
 
 export interface CustomerRepository {
   list(query?: CustomerQuery): Customer[];
@@ -16,15 +17,10 @@ export interface CustomerRepository {
 export class InMemoryCustomerRepository implements CustomerRepository {
   private readonly customers = new Map<string, Customer>();
 
-  private normalizeEmail(email: string): string {
-    return email.trim().toLowerCase();
-  }
-
   list(query: CustomerQuery = {}): Customer[] {
-    const emailFilter = query.email ? this.normalizeEmail(query.email) : undefined;
+    const emailFilter = query.email ? normalizeEmail(query.email) : undefined;
     const nameFilter = query.name ? query.name.trim().toLowerCase() : undefined;
     const items = [...this.customers.values()]
-      .map((customer) => ({ ...customer }))
       .filter((customer) => {
         if (emailFilter && customer.email.toLowerCase() !== emailFilter) {
           return false;
@@ -35,7 +31,8 @@ export class InMemoryCustomerRepository implements CustomerRepository {
         }
 
         return true;
-      });
+      })
+      .map((customer) => ({ ...customer }));
 
     const hasPage =
       typeof query.page === "number" &&
@@ -63,14 +60,11 @@ export class InMemoryCustomerRepository implements CustomerRepository {
   }
 
   findByEmail(email: string): Customer | undefined {
-    const normalizedEmail = this.normalizeEmail(email);
-    for (const customer of this.customers.values()) {
-      if (this.normalizeEmail(customer.email) === normalizedEmail) {
-        return { ...customer };
-      }
-    }
-
-    return undefined;
+    const normalizedEmail = normalizeEmail(email);
+    const customer = [...this.customers.values()].find(
+      (candidate) => candidate.email === normalizedEmail,
+    );
+    return customer ? { ...customer } : undefined;
   }
 
   create(fields: CustomerFields): Customer {
@@ -78,7 +72,7 @@ export class InMemoryCustomerRepository implements CustomerRepository {
     const customer: Customer = {
       id: randomUUID(),
       ...fields,
-      email: this.normalizeEmail(fields.email),
+      email: normalizeEmail(fields.email),
       createdAt: now,
       updatedAt: now,
     };
@@ -99,7 +93,7 @@ export class InMemoryCustomerRepository implements CustomerRepository {
     const updated: Customer = {
       ...current,
       ...fields,
-      email: fields.email ? this.normalizeEmail(fields.email) : current.email,
+      email: fields.email ? normalizeEmail(fields.email) : current.email,
       updatedAt: fields.updatedAt ?? new Date(),
     };
 
