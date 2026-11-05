@@ -5,7 +5,9 @@ import {
   type CustomerRepository,
 } from "./customer-repository.js";
 import type { Customer } from "./customer.js";
+import type { Booking } from "./booking.js";
 import { CustomerService } from "./services/customer.service.js";
+import type { BookingService } from "./services/booking.service.js";
 import { ValidationError } from "./utils/validation.js";
 
 type ErrorResponse = { error: string };
@@ -15,7 +17,12 @@ type PaginatedResponse = {
   limit: number;
   total: number;
 };
-type ApiResponse = Customer | Customer[] | PaginatedResponse | ErrorResponse;
+type ApiResponse =
+  | Customer
+  | Customer[]
+  | Booking[]
+  | PaginatedResponse
+  | ErrorResponse;
 type RouteParams = Record<string, string>;
 
 function sendError(
@@ -49,6 +56,7 @@ function readQueryString(value: unknown): string | undefined {
 
 export function createCustomersRouter(
   repository: CustomerRepository = new InMemoryCustomerRepository(),
+  bookingService?: BookingService,
 ): ReturnType<typeof Router> {
   const router = Router();
   const service = new CustomerService(repository);
@@ -172,9 +180,26 @@ export function createCustomersRouter(
     response.status(204).send();
   };
 
+  const listCustomerBookings: RequestHandler<
+    RouteParams,
+    ApiResponse,
+    unknown
+  > = (request, response) => {
+    const bookings = bookingService?.listByCustomer(request.params.id);
+    if (!bookings) {
+      sendError(response, 404, "Customer not found.");
+      return;
+    }
+
+    response.json(bookings);
+  };
+
   router.get("/", listCustomers);
   router.post("/", createCustomer);
   router.get("/email/:email", getCustomerByEmail);
+  if (bookingService) {
+    router.get("/:id/bookings", listCustomerBookings);
+  }
   router.get("/:id", getCustomerById);
   router.put("/:id", updateCustomer);
   router.delete("/:id", deleteCustomer);

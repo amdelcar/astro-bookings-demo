@@ -101,7 +101,7 @@ Create a launch with `POST /launches` and a JSON body such as:
 ```
 
 Launch creation fails with `400` for invalid data and `404` when the referenced
-rocket does not exist.
+rocket does not exist. New launches start with `scheduled` status.
 
 ## Customer API
 
@@ -135,6 +135,36 @@ an array. Supplying `page` or `limit` returns an object with `items`, `page`,
 `limit`, and `total`; for example, `GET /customers?page=1&limit=10`. Invalid
 input and duplicate emails return `400`; unknown customer IDs or emails return
 `404`. Errors use a JSON object with an `error` message.
+
+## Booking API
+
+Bookings reserve seats on scheduled or active launches. Each successful
+reservation holds seats immediately, including while its payment is pending.
+Booking data and seat availability are stored in memory and reset on restart.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/launches/:id/availability` | Return capacity, reserved and available seats, and price per seat |
+| `POST` | `/bookings` | Reserve seats for a customer on a launch |
+| `GET` | `/bookings/:id` | Retrieve a booking |
+| `GET` | `/customers/:id/bookings` | List a customer's bookings |
+
+Create a booking with `POST /bookings` and a JSON body such as:
+
+```json
+{
+  "customerId": "<customer-id>",
+  "launchId": "<launch-id>",
+  "seatCount": 2
+}
+```
+
+Successful reservations return `201` with the booking status, seat count,
+captured per-seat price, total price, and creation timestamp. Invalid seat
+counts return `400`, missing customers, launches, or bookings return `404`,
+and launches that are not bookable or have insufficient remaining seats return
+`409`. Reservations are created atomically, so rejected requests do not
+consume seats. Payment processing is not part of this API.
 
 - [Repository at GitHub](https://github.com/amdelcar/astro-bookings-demo)
 - Default branch: `main`

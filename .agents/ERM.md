@@ -49,15 +49,19 @@
 - **launchId**: string (Foreign Key → Launch)
 - **customerId**: string (Foreign Key → Customer)
 - **seatCount**: number (≥ 1)
-- **totalPrice**: number
+- **perSeatPrice**: number (> 0, copied from Launch when reserved)
+- **totalPrice**: number (= perSeatPrice × seatCount)
 - **status**: string (pending | confirmed | cancelled)
 - **createdAt**: Date
 
 **Rules:**
 - Seat count must be at least 1
-- Total price calculated from launch price × seat count
-- Cannot exceed available seats on launch
-- Status reflects booking lifecycle
+- Per-seat price is captured at reservation time
+- Total price is calculated from per-seat price × seat count
+- Pending and confirmed bookings count toward launch capacity; cancelled
+  bookings do not
+- A reservation and its seat allocation are created together or not at all
+- Status reflects reservation/payment lifecycle; payment processing is FR5
 
 ## Relationships
 
@@ -99,6 +103,7 @@ erDiagram
         string launchId FK
         string customerId FK
         number seatCount
+        number perSeatPrice
         number totalPrice
         string status
         date createdAt
@@ -111,11 +116,13 @@ erDiagram
 - Rocket entity with CRUD operations
 - Launch entity with CRUD operations and lifecycle management
 
-**Phase 2 - In Progress:**
+**Phase 2 - Completed:**
 - Customer entity with registration and profile management
 
-**Phase 3 - Planned:**
-- Booking entity with seat reservation and payment processing
+**Phase 3 - Completed:**
+- Booking entity with seat reservation
+
+**Phase 4 - Planned:**
 - Payment entity for transaction tracking
 
 **Data Integrity Constraints:**
@@ -124,3 +131,4 @@ erDiagram
 - Rocket name uniqueness constraint
 - Status transitions validated at service layer
 - Availability calculations derived from capacity minus booked seats
+- Booking creation and seat reservation are atomic
