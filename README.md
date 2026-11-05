@@ -1,16 +1,12 @@
 # AstroBookings
 
-AstroBookings is a backend API for offering bookings for rocket launches.
-
-
-
+AstroBookings is a backend API for managing rockets, launches, and customer
+profiles for a rocket-launch booking demo.
 
 - Launches are scheduled for specific rockets with pricing and minimum passenger thresholds.
 - Rockets have limited seats; launch requests are validated against rocket capacity.
-- Customers are identified by  email and store name and phone details.
+- Customer profiles contain a unique email address, name, and international phone number.
 - Launch status lifecycle: scheduled -> confirmed -> successful, or cancellation/suspension paths.
-- One customer can book multiple seats on a launch but cannot exceed the available seats.
-- Customers are billed upon booking, and payments are processed through a mock gateway.
 
 > [!WARNING]
 > AstroBookings is a fictional training project.
@@ -28,8 +24,9 @@ npm run dev
 The server listens on port `3000` by default; set `PORT` to use another port.
 The `GET /health` endpoint returns `{"status":"ok"}`.
 Build with `npm run build`, then run the compiled app with `npm start`.
-Run `npm test` for the rocket API end-to-end checks, or `npm run typecheck` to
-check types without emitting files.
+Run `npm test` for the configured HTTP and repository tests, `npm run test:unit`
+for the Vitest unit suite, or `npm run typecheck` to check types without
+emitting files.
 
 ## Logging
 
@@ -105,6 +102,39 @@ Create a launch with `POST /launches` and a JSON body such as:
 
 Launch creation fails with `400` for invalid data and `404` when the referenced
 rocket does not exist.
+
+## Customer API
+
+Customer records are kept in memory and are lost when the server restarts.
+Emails are trimmed, normalized to lowercase, and unique. Email cannot be
+changed after registration. Names must contain 2-100 supported characters and
+phone numbers must use an international `+` format.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/customers` | List customers; supports `email` and `name` filters |
+| `POST` | `/customers` | Register a customer |
+| `GET` | `/customers/:id` | Retrieve a customer |
+| `GET` | `/customers/email/:email` | Find a customer by email |
+| `PUT` | `/customers/:id` | Update a customer's name and/or phone |
+| `DELETE` | `/customers/:id` | Remove a customer |
+
+Register a customer with `POST /customers` and a JSON body such as:
+
+```json
+{
+  "email": "alex@example.com",
+  "name": "Alex Morgan",
+  "phone": "+1234567890"
+}
+```
+
+Successful registration returns `201` with the customer record, including its
+generated UUID and timestamps. Listing without pagination parameters returns
+an array. Supplying `page` or `limit` returns an object with `items`, `page`,
+`limit`, and `total`; for example, `GET /customers?page=1&limit=10`. Invalid
+input and duplicate emails return `400`; unknown customer IDs or emails return
+`404`. Errors use a JSON object with an `error` message.
 
 - [Repository at GitHub](https://github.com/amdelcar/astro-bookings-demo)
 - Default branch: `main`

@@ -1,21 +1,21 @@
 # Agents Instructions
 
 ## Product Overview
-AstroBookings is a backend API for booking rocket launches.
-Rockets have capacity limits and launch status lifecycles.
-Customer booking and payment features are planned.
+AstroBookings is a backend API for managing rockets, launches, and customer
+profiles for a rocket-launch booking demo. Rockets have capacity limits and
+launch status lifecycles. Booking and payment features are planned.
 This is a demo system for training purposes.
 
 ## Technical Implementation
 
 ### Tech Stack
-- Language: **TypeScript 5.6** on **Node.js 22**
-- Framework: **Express 4.21**
+- Language: **TypeScript 5.7** on **Node.js 20+**
+- Framework: **Express 5**
 - Database: **In-memory store** (no persistence)
 - Security: **None** (demo only)
-- Testing: **Playwright 1.58** for E2E and **Vitest** for unit tests
-- Logging: **Console via logger utility** (info/warn/error/debug)
-- Version: **1.3.0** (tracked in CHANGELOG.md)
+- Testing: **Node.js test runner** for HTTP/repository tests and **Vitest** for unit tests
+- Logging: **Structured JSON console events**
+- Version: **1.9.0** (tracked in package.json and CHANGELOG.md)
 
 ### Development workflow
 ```bash
@@ -30,9 +30,9 @@ npm run dev        # Development mode with watch
 npm start          # Production mode
 
 # Test the project
-npm test           # Run Playwright tests
-npm run test:dev   # Run Vitest in watch mode
-npm run test:unit  # Run unit tests once
+npm test              # Run configured HTTP and repository tests
+npm run test:dev      # Run Vitest in watch mode
+npm run test:unit     # Run unit tests once
 npm run test:coverage # Run coverage report
 
 # Deploy the project
@@ -51,32 +51,32 @@ npm run test:coverage # Run coverage report
 ├── CHANGELOG.md          # Version history and release notes
 ├── package.json          # Node.js dependencies and scripts
 ├── tsconfig.json         # TypeScript configuration
-├── playwright.config.ts  # Playwright test configuration
-├── specs/                # Specification documents
-│   ├── rockets.spec.md   # Rocket API specification
-│   └── launches.spec.md  # Launches API specification
+├── .agents/specs/        # Feature specifications and implementation plans
 ├── src/                  # Source code
-│   ├── index.ts          # Application entry point
+│   ├── app.ts            # Express app composition
+│   ├── index.ts          # Server entry point
+│   ├── customer.ts       # Customer data types
+│   ├── customer-repository.ts
+│   ├── customers.ts      # Customer API routes
+│   ├── launch.ts         # Launch data types
+│   ├── launch-repository.ts
+│   ├── launches.ts       # Launch API routes
+│   ├── rocket.ts         # Rocket data types
+│   ├── rocket-repository.ts
+│   ├── rockets.ts        # Rocket API routes
 │   ├── routes/           # Express route handlers
-│   │   ├── launchRoutes.ts
-│   │   └── rocketRoutes.ts
+│   │   └── customerRoutes.ts # Compatibility export for customer router
 │   ├── services/         # Business logic and data stores
-│   │   ├── launch.repository.ts
-│   │   ├── launch.service.ts
-│   │   ├── launchStore.ts
-│   │   ├── rocket.repository.ts
-│   │   ├── rocket.service.ts
-│   │   └── rocketStore.ts
-│   ├── types/            # TypeScript type definitions
-│   │   ├── launch.ts     # Launch types and data structures
-│   │   └── rocket.ts     # Rocket types and data structures
-│   └── utils/            # Shared utilities
-│       ├── error-handler.ts   # Error handling with custom error types
-│       ├── logger.ts          # Leveled logging utility
-│       └── validation.ts      # Input validation helpers
-└── tests/                # Playwright test files
-    ├── health.spec.ts    # Health check tests
-    └── rockets.spec.ts   # Rocket API tests
+│   │   └── customer.service.ts
+│   ├── types/            # Compatibility exports for domain types
+│   ├── logger.ts         # Structured event logging
+│   └── utils/
+│       └── validation.ts # Shared input validation
+└── tests/                # HTTP and repository test files
+    ├── customer.spec.ts  # Legacy, unconfigured customer test prototype
+    ├── logging.test.ts
+    ├── rocket-repository.test.ts
+    └── rockets.test.ts
 ```
 
 ### Architecture & Coding Standards

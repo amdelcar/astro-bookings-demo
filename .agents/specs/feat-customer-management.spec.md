@@ -1,6 +1,6 @@
 # Customer Management API Specification
 - **Type**: feat
-- **Status**: Planned
+- **Status**: Released in 1.9.0
 
 ## Problem Description
 
@@ -132,6 +132,17 @@ src/
 - Error handling: non-existent customer queries
 
 ---
+
+## Implementation Notes
+
+- The API is mounted at `/customers` (not `/api/customers`).
+- Customer list filters accept `email` and `name`. Without `page` or `limit`,
+  the endpoint returns an array; with either pagination parameter, it returns
+  `{ items, page, limit, total }`.
+- Validation failures return a JSON `{ "error": "..." }` message rather than
+  field-keyed error details.
+- The customer acceptance test file is not connected to the package test
+  scripts; the configured Vitest suite covers customer service behavior.
 
 **Related PRD**: FR3 - Customer Registration and Profile Management  
 **Priority**: High (blocking for FR4 - Seat Booking)  
