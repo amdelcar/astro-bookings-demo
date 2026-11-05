@@ -4,7 +4,7 @@
     ".agents/prompts": true
   },
   "chat.agentFilesLocations": {
-    ".agents": true
+    ".agents/agents": true
   },
   "chat.agentSkillsLocations": {
     ".agents/skills": true,
