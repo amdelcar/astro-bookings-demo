@@ -1,5 +1,10 @@
 # Implementation Plan for Customer Management (FR3)
 
+> Implementation completed and released in v1.9.0. The source layout evolved
+> from the proposed routes/services/store split; current locations and test
+> coverage are recorded below. The unchecked boxes are the original planning
+> checklist; they are retained as a historical snapshot.
+
 ## Step 1: Create Customer Type Definitions
 Define the TypeScript types and data structures for the customer domain.
 
@@ -78,3 +83,18 @@ Complete implementation and prepare for deployment.
 - [ ] Commit changes with conventional commit messages
 - [ ] Update CHANGELOG.md with new features
 - [ ] Verify integration with existing rocket and launch endpoints
+
+## Implementation Record
+
+- Customer types are defined in `src/customer.ts` and re-exported from
+  `src/types/customer.ts`.
+- `src/customer-repository.ts` implements the in-memory store and repository;
+  there is no separate customer store module.
+- `src/customers.ts` contains the router, mounted by `src/app.ts`; the
+  `src/routes/customerRoutes.ts` module re-exports the router.
+- Validation and service unit tests are in `src/utils/validation.ts` and
+  `src/services/customer.service.spec.ts`.
+- `tests/customer.spec.ts` is not wired into the project test scripts and uses
+  an outdated `/api/customers` path and response shape. It is not counted as
+  verified end-to-end coverage. `npm run test:unit` and `npm test` are the
+  configured test commands.
